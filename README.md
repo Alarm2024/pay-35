@@ -22,7 +22,7 @@ Open the deployed app (or `npm start` locally). The homepage shows **five number
 
 **Health check:** `/health` returns booleans only for secrets (never raw keys).
 
-**Entitlement:** `REVENUECAT_ENTITLEMENT_ID` defaults to `pro`. Aliases like `pay-35-pro` also work client-side if configured in RevenueCat.
+**Entitlement:** Set `REVENUECAT_ENTITLEMENT_ID` to the **exact identifier** shown on RevenueCat → **Product catalog → Entitlements** (e.g. `pro` or `pay-35 Pro`). For `test_*` keys, any active entitlement also unlocks Pro; spaced ids like `pay-35 Pro` are normalized client-side.
 
 ---
 
@@ -58,7 +58,7 @@ Create a project (or use an existing one). A **Test Store** is often auto-create
 ### 3. Product catalog
 
 1. **Product catalog → Products** — create a **Test Store** subscription product (e.g. `mlpay_pro_monthly`, 1 month).
-2. **Product catalog → Entitlements** — create entitlement identifier **`pro`** (aliases like `pay-35-pro` also work — set `REVENUECAT_ENTITLEMENT_ID` to match) and attach the Test Store product.
+2. **Product catalog → Entitlements** — create an entitlement and note its **exact identifier** (e.g. `pro`, `pay-35 Pro`). Attach your Test Store product. Set `REVENUECAT_ENTITLEMENT_ID` to that exact string in Render / `.env`.
 3. **Product catalog → Offerings** — edit **Current** offering (or create one), add a package pointing at your Test Store product.
 
 ### 4. Paywall (optional)
@@ -74,6 +74,7 @@ REVENUECAT_API_KEY=test_your_test_store_public_key
 # Web Billing + Stripe (production-style web checkout) — key starts with rcb_
 # REVENUECAT_API_KEY=rcb_your_web_billing_public_key
 
+# Copy EXACT entitlement identifier from RevenueCat → Product catalog → Entitlements
 REVENUECAT_ENTITLEMENT_ID=pro
 ```
 
@@ -100,7 +101,7 @@ On boot and checkout start, a **Please wait…** overlay (`#pay-ready`) may appe
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `REVENUECAT_API_KEY` | Yes (for live Test Store demo) | Public Web / Test Store SDK key |
-| `REVENUECAT_ENTITLEMENT_ID` | No (default `pro`) | Entitlement that unlocks full research. Common aliases: `pro`, `pay-35-pro`, `pay35_pro`, `morning_light_pro` |
+| `REVENUECAT_ENTITLEMENT_ID` | No (default `pro`) | **Exact** entitlement identifier from RevenueCat Entitlements page. Aliases also matched: `pro`, `pay-35 Pro`, `pay-35-pro`, `pay_35_pro`, `pay35_pro`, `Morning Light Pro`. With `test_*` keys, any active entitlement unlocks Pro. |
 | `LINKUP_API_KEY` | No | Linkup `/search` for live web sources |
 | `PORT` | No (default `3000`) | HTTP port (`Render` sets this) |
 
@@ -139,7 +140,7 @@ Without `REVENUECAT_API_KEY`, the UI and mock research still run; purchase butto
 3. **Start command:** `npm start`
 4. Add env vars in Render dashboard:
    - `REVENUECAT_API_KEY`
-   - `REVENUECAT_ENTITLEMENT_ID=pro`
+   - `REVENUECAT_ENTITLEMENT_ID` — exact id from RevenueCat Entitlements (e.g. `pro` or `pay-35 Pro`)
    - `LINKUP_API_KEY` (optional)
 
 Render sets `PORT` automatically.
@@ -162,7 +163,8 @@ Use a known Solana address (mint or pool), e.g. wrapped SOL:
 
 1. Tap step **② Unlock Pro (TEST)** (or **Unlock Pro (TEST)** in paywall).
 2. In the RevenueCat modal, choose **Success** (sandbox).
-3. Tap step **③ After** if results didn't refresh — badge → **PRO ACTIVE**; full score, verdict, flags, sources render.
+3. UI auto-refreshes as **Pro** (badge → **PRO ACTIVE**, full score/verdict/flags/sources). If the entitlement id differs from env, a **TEST Success · Pro (demo grant)** banner still unlocks Pro for Test Store demos.
+4. Tap step **③ After** only if you need to re-run the Pro view manually.
 
 ### 3. FAILED purchase path
 

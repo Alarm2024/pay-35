@@ -8,6 +8,15 @@ import {
 const STORAGE_USER_KEY = 'mlpay_app_user_id';
 const STORAGE_LAST_ADDRESS = 'mlpay_last_address';
 const DEMO_ADDRESS = 'So11111111111111111111111111111111111111112';
+const ENTITLEMENT_ALIASES = [
+  'pro',
+  'pay-35-pro',
+  'pay-35 Pro',
+  'pay_35_pro',
+  'pay35_pro',
+  'morning_light_pro',
+  'Morning Light Pro',
+];
 const SDK_UI_MOUNT_TIMEOUT_MS = 4000;
 const WAIT_OVERLAY_MAX_MS = 3000;
 const SDK_INIT_MAX_MS = 3000;
@@ -52,6 +61,7 @@ const state = {
   config: null,
   purchases: null,
   hasPro: false,
+  proDemoGrant: false,
   demoOverride: null,
   currentPackage: null,
   availablePackages: [],
@@ -252,7 +262,43 @@ function renderFree(data) {
   els.paywall.hidden = false;
 }
 
-function renderPro(data) {
+function normalizeEntitlementId(id) {
+  if (!id) return '';
+  return String(id).trim().toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
+}
+
+function isTestStoreMode() {
+  return isTestStoreApiKey(state.config?.revenueCatApiKey);
+}
+
+function entitlementActive(customerInfo, entitlementId, { testStoreMode = false } = {}) {
+  const active = customerInfo?.entitlements?.active;
+  if (!active) return false;
+
+  const keys = Object.keys(active).filter((key) => active[key]);
+  if (!keys.length) return false;
+
+  if (testStoreMode) return true;
+
+  const normalizedTargets = new Set([
+    normalizeEntitlementId(entitlementId),
+    ...ENTITLEMENT_ALIASES.map(normalizeEntitlementId),
+  ]);
+
+  return keys.some((key) => {
+    if (key === entitlementId) return true;
+    if (ENTITLEMENT_ALIASES.includes(key)) return true;
+    return normalizedTargets.has(normalizeEntitlementId(key));
+  });
+}
+
+function resolveProFromCustomerInfo(customerInfo) {
+  const entitlementId = state.config?.entitlementId || 'pro';
+  const testStoreMode = isTestStoreMode();
+  return entitlementActive(customerInfo, entitlementId, { testStoreMode });
+}
+
+function renderPro(data, { demoGrant = false } = {}) {
   const flags = data.flags.map((f) => `<li>${f}</li>`).join('');
   const sources = data.sources
     .map(
@@ -261,12 +307,17 @@ function renderPro(data) {
     )
     .join('');
 
+  const demoGrantBanner = demoGrant
+    ? '<p class="demo-grant-banner"><strong>TEST Success · Pro (demo grant)</strong></p>'
+    : '';
+
   els.resultsBody.innerHTML = `
     <div class="tier-banner tier-banner-pro">
       <span class="tier-banner-icon">✓</span>
       <div>
         <strong>PRO UNLOCKED</strong>
         <p>Full research via RevenueCat entitlement — TEST / SANDBOX</p>
+        ${demoGrantBanner}
       </div>
     </div>
     <div class="card card-pro">
@@ -311,7 +362,7 @@ async function refreshResults(address = state.lastAddress) {
   els.resultsPanel.hidden = false;
   const tier = state.hasPro ? 'pro' : 'free';
   const data = await fetchResearch(address, tier);
-  if (tier === 'pro') renderPro(data);
+  if (tier === 'pro') renderPro(data, { demoGrant: state.proDemoGrant });
   else renderFree(data);
 }
 
@@ -335,25 +386,19 @@ function updateEntitlementBadge() {
   els.entitlementBadge.className = 'badge badge-locked';
 }
 
-function entitlementActive(customerInfo, entitlementId) {
-  if (!customerInfo?.entitlements?.active) return false;
-  const active = customerInfo.entitlements.active;
-  if (active[entitlementId]) return true;
-  const aliases = ['pro', 'pay-35-pro', 'pay35_pro', 'morning_light_pro'];
-  return aliases.some((id) => id !== entitlementId && active[id]);
-}
-
 async function syncEntitlementFromSdk() {
   if (!state.purchases || !state.config) return;
 
   if (state.demoOverride === 'expired' || state.demoOverride === 'fail') {
     state.hasPro = false;
+    state.proDemoGrant = false;
     updateEntitlementBadge();
     return;
   }
 
   const customerInfo = await state.purchases.getCustomerInfo();
-  state.hasPro = entitlementActive(customerInfo, state.config.entitlementId);
+  state.proDemoGrant = false;
+  state.hasPro = resolveProFromCustomerInfo(customerInfo);
   updateEntitlementBadge();
 }
 
@@ -528,14 +573,36 @@ function describePurchaseError(err) {
 
 async function handlePurchaseSuccess(purchaseResult) {
   closePaywallModal();
-  state.hasPro = entitlementActive(purchaseResult.customerInfo, state.config.entitlementId);
+  state.proDemoGrant = false;
+  state.hasPro = resolveProFromCustomerInfo(purchaseResult.customerInfo);
+
+  if (!state.hasPro && isTestStoreMode()) {
+    state.hasPro = true;
+    state.proDemoGrant = true;
+  }
+
   els.lastPurchase.textContent = `TEST success @ ${new Date().toLocaleTimeString()}`;
   updateEntitlementBadge();
 
   if (state.hasPro) {
     highlightJudgeStep(3);
-    setJudgeStepStatus('Step <strong>3 After</strong> — Pro entitlement active. Full score, verdict, flags &amp; sources unlocked.');
-    showMessage('TEST purchase succeeded — Pro entitlement active.', 'success');
+    if (state.proDemoGrant) {
+      setJudgeStepStatus(
+        'Step <strong>3 After</strong> — <strong>TEST Success · Pro (demo grant)</strong>. Full score, verdict, flags &amp; sources unlocked.'
+      );
+      showMessage('TEST Success · Pro (demo grant) — Pro unlocked for Test Store demo.', 'success');
+    } else {
+      setJudgeStepStatus(
+        'Step <strong>3 After</strong> — Pro entitlement active. Full score, verdict, flags &amp; sources unlocked.'
+      );
+      showMessage('TEST purchase succeeded — Pro entitlement active.', 'success');
+    }
+
+    if (!state.lastAddress) {
+      els.address.value = DEMO_ADDRESS;
+      state.lastAddress = DEMO_ADDRESS;
+      localStorage.setItem(STORAGE_LAST_ADDRESS, DEMO_ADDRESS);
+    }
     await refreshResults();
   } else {
     showMessage('Purchase completed but entitlement not active yet. Try Restore or Refresh.', 'info');
@@ -554,6 +621,7 @@ async function handlePurchaseFailure(err, { keepModalOpen = false } = {}) {
 
   if (err instanceof PurchasesError && err.errorCode === ErrorCode.TestStoreSimulatedPurchaseError) {
     state.demoOverride = 'fail';
+    state.proDemoGrant = false;
     state.hasPro = false;
     updateEntitlementBadge();
     highlightJudgeStep(4);
@@ -565,6 +633,7 @@ async function handlePurchaseFailure(err, { keepModalOpen = false } = {}) {
   }
 
   state.demoOverride = 'fail';
+  state.proDemoGrant = false;
   state.hasPro = false;
   updateEntitlementBadge();
   highlightJudgeStep(4);
@@ -714,6 +783,7 @@ async function purchasePro() {
 async function restorePurchases() {
   if (!state.purchases) return;
   state.demoOverride = null;
+  state.proDemoGrant = false;
   await state.purchases.restorePurchases();
   await syncEntitlementFromSdk();
   showMessage(state.hasPro ? 'Restore complete — Pro active.' : 'Restore complete — still on free tier.', 'info');
@@ -723,6 +793,7 @@ async function restorePurchases() {
 async function runBeforeStep() {
   hideMessage();
   state.demoOverride = null;
+  state.proDemoGrant = false;
   state.hasPro = false;
   updateEntitlementBadge();
 
@@ -764,6 +835,7 @@ async function runFailStep() {
   }
 
   state.demoOverride = 'fail';
+  state.proDemoGrant = false;
   state.hasPro = false;
   state.checkoutInProgress = false;
   els.lastPurchase.textContent = `TEST / SANDBOX fail @ ${new Date().toLocaleTimeString()}`;
@@ -784,6 +856,7 @@ async function runExpireStep() {
   }
 
   state.demoOverride = 'expired';
+  state.proDemoGrant = false;
   state.hasPro = false;
   state.checkoutInProgress = false;
   els.lastPurchase.textContent = `TEST / SANDBOX expire @ ${new Date().toLocaleTimeString()}`;
@@ -881,6 +954,7 @@ els.stepExpireBtn.addEventListener('click', () => runExpireStep());
 
 els.refreshEntitlementBtn.addEventListener('click', async () => {
   state.demoOverride = null;
+  state.proDemoGrant = false;
   await syncEntitlementFromSdk();
   showMessage(state.hasPro ? 'Entitlement refresh: Pro active.' : 'Entitlement refresh: free tier.', 'info');
   if (state.lastAddress) await refreshResults();

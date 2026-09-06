@@ -719,6 +719,13 @@ input[type="text"]:focus {
   color: var(--muted);
 }
 
+.demo-grant-banner {
+  margin-top: 0.35rem !important;
+  color: var(--green) !important;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
 .card-free {
   border-color: rgba(255, 92, 92, 0.35);
 }
