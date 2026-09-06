@@ -146,13 +146,24 @@
       </section>
     </main>
 
+    <div id="pay-ready" class="pay-ready" hidden aria-live="polite" aria-busy="true">
+      <div class="pay-ready-card">
+        <div class="pay-ready-spinner" aria-hidden="true"></div>
+        <p class="pay-ready-title">Please wait…</p>
+        <p class="pay-ready-detail">We are processing your request. This should only take a moment.</p>
+        <p id="pay-ready-status" class="pay-ready-status"></p>
+      </div>
+    </div>
+
     <div id="paywall-modal" class="modal" hidden>
       <div class="modal-card">
         <div class="modal-header">
           <span class="badge badge-sandbox">TEST / SANDBOX CHECKOUT</span>
           <button id="close-paywall-btn" class="icon-btn" type="button" aria-label="Close">×</button>
         </div>
+        <p id="paywall-status" class="paywall-status" hidden></p>
         <div id="paywall-container" class="paywall-container"></div>
+        <div id="paywall-fallback" class="paywall-fallback" hidden></div>
       </div>
     </div>
 
