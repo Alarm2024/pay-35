@@ -29,11 +29,56 @@
     </header>
 
     <main class="layout">
+      <section class="panel judge-demo">
+        <div class="judge-demo-header">
+          <h2>60-second judge demo</h2>
+          <p class="muted">One tap per step — RevenueCat Test Store · entitlement <code id="entitlement-label">pro</code></p>
+        </div>
+        <ol class="judge-steps" id="judge-steps">
+          <li>
+            <button id="step-before-btn" class="judge-step-btn" type="button" data-step="1">
+              <span class="step-num">1</span>
+              <span class="step-label">Before</span>
+              <span class="step-hint">Free scan</span>
+            </button>
+          </li>
+          <li>
+            <button id="step-unlock-btn" class="judge-step-btn judge-step-accent" type="button" data-step="2">
+              <span class="step-num">2</span>
+              <span class="step-label">Unlock Pro</span>
+              <span class="step-hint">TEST checkout</span>
+            </button>
+          </li>
+          <li>
+            <button id="step-after-btn" class="judge-step-btn judge-step-pro" type="button" data-step="3">
+              <span class="step-num">3</span>
+              <span class="step-label">After</span>
+              <span class="step-hint">Pro unlocked</span>
+            </button>
+          </li>
+          <li>
+            <button id="step-fail-btn" class="judge-step-btn judge-step-fail" type="button" data-step="4">
+              <span class="step-num">4</span>
+              <span class="step-label">Fail</span>
+              <span class="step-hint">TEST / SANDBOX</span>
+            </button>
+          </li>
+          <li>
+            <button id="step-expire-btn" class="judge-step-btn judge-step-expire" type="button" data-step="5">
+              <span class="step-num">5</span>
+              <span class="step-label">Expire</span>
+              <span class="step-hint">TEST / SANDBOX</span>
+            </button>
+          </li>
+        </ol>
+        <p id="judge-step-status" class="judge-step-status">Tap <strong>1 Before</strong> to load a sample Solana address on the free tier.</p>
+      </section>
+
       <section class="panel hero">
         <p class="lede">
           Solana traders get a <strong>free mint/pool glance</strong>, then unlock
           <strong>Pro research</strong> via RevenueCat Test Store — full verdict, risk score, and
-          sources-style detail behind entitlement <code id="entitlement-label">pro</code>.
+          sources-style detail behind entitlement <code id="entitlement-label-inline">pro</code>.
         </p>
 
         <form id="lookup-form" class="lookup-form">
@@ -69,7 +114,7 @@
             <strong id="paywall-entitlement">pro</strong>.
           </p>
           <div class="cta-row">
-            <button id="unlock-btn" class="btn btn-accent" type="button">Unlock Pro (Test Store)</button>
+            <button id="unlock-btn" class="btn btn-accent" type="button">Unlock Pro (TEST)</button>
             <button id="restore-btn" class="btn btn-ghost" type="button">Restore purchases</button>
           </div>
           <p id="offering-price" class="offering-meta"></p>
@@ -77,15 +122,11 @@
       </section>
 
       <section class="panel judge-tools">
-        <h2>Judge demo controls</h2>
+        <h2>RevenueCat sync</h2>
         <p class="muted">
-          RevenueCat Test Store shows success / fail / cancel in its purchase modal. Use the buttons
-          below to rehearse failed purchase and expired entitlement UI paths without waiting for
-          subscription expiry.
+          After a live Test Store purchase, use restore or refresh to sync entitlement state from RevenueCat.
         </p>
         <div class="cta-row">
-          <button id="simulate-fail-btn" class="btn btn-danger" type="button">Simulate failed purchase</button>
-          <button id="simulate-expire-btn" class="btn btn-warning" type="button">Simulate expired entitlement</button>
           <button id="refresh-entitlement-btn" class="btn btn-ghost" type="button">Refresh entitlement</button>
         </div>
         <dl class="meta-grid">

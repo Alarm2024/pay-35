@@ -6,6 +6,7 @@ import {
 
 const STORAGE_USER_KEY = 'mlpay_app_user_id';
 const STORAGE_LAST_ADDRESS = 'mlpay_last_address';
+const DEMO_ADDRESS = 'So11111111111111111111111111111111111111112';
 
 const els = {
   form: document.getElementById('lookup-form'),
@@ -20,9 +21,8 @@ const els = {
   offeringPrice: document.getElementById('offering-price'),
   entitlementBadge: document.getElementById('entitlement-badge'),
   entitlementLabel: document.getElementById('entitlement-label'),
+  entitlementLabelInline: document.getElementById('entitlement-label-inline'),
   paywallEntitlement: document.getElementById('paywall-entitlement'),
-  simulateFailBtn: document.getElementById('simulate-fail-btn'),
-  simulateExpireBtn: document.getElementById('simulate-expire-btn'),
   refreshEntitlementBtn: document.getElementById('refresh-entitlement-btn'),
   appUserId: document.getElementById('app-user-id'),
   rcStatus: document.getElementById('rc-status'),
@@ -30,6 +30,13 @@ const els = {
   paywallModal: document.getElementById('paywall-modal'),
   paywallContainer: document.getElementById('paywall-container'),
   closePaywallBtn: document.getElementById('close-paywall-btn'),
+  stepBeforeBtn: document.getElementById('step-before-btn'),
+  stepUnlockBtn: document.getElementById('step-unlock-btn'),
+  stepAfterBtn: document.getElementById('step-after-btn'),
+  stepFailBtn: document.getElementById('step-fail-btn'),
+  stepExpireBtn: document.getElementById('step-expire-btn'),
+  judgeStepStatus: document.getElementById('judge-step-status'),
+  judgeSteps: document.getElementById('judge-steps'),
 };
 
 const state = {
@@ -39,6 +46,7 @@ const state = {
   demoOverride: null,
   currentPackage: null,
   lastAddress: localStorage.getItem(STORAGE_LAST_ADDRESS) || '',
+  activeJudgeStep: null,
 };
 
 function showMessage(text, type = 'info') {
@@ -49,6 +57,17 @@ function showMessage(text, type = 'info') {
 
 function hideMessage() {
   els.message.hidden = true;
+}
+
+function setJudgeStepStatus(html) {
+  els.judgeStepStatus.innerHTML = html;
+}
+
+function highlightJudgeStep(step) {
+  state.activeJudgeStep = step;
+  els.judgeSteps.querySelectorAll('.judge-step-btn').forEach((btn) => {
+    btn.classList.toggle('is-active', Number(btn.dataset.step) === step);
+  });
 }
 
 function getOrCreateAppUserId() {
@@ -69,16 +88,44 @@ function verdictClass(verdict) {
 
 function renderFree(data) {
   els.resultsBody.innerHTML = `
-    <div class="card">
+    <div class="tier-banner tier-banner-free">
+      <span class="tier-banner-icon">🔒</span>
+      <div>
+        <strong>FREE TIER</strong>
+        <p>Teaser only — Pro unlocks score, verdict, flags &amp; sources</p>
+      </div>
+    </div>
+    <div class="card card-free">
       <h3>${data.addressType}</h3>
       <p><code>${data.address}</code></p>
       <p>${data.teaser}</p>
-      <p>Risk band hint: <strong>${data.riskHint}</strong> (exact score locked)</p>
+      <p class="free-hint">Risk band hint: <strong>${data.riskHint}</strong></p>
     </div>
-    <div class="card">
-      <h3>Locked behind Pro</h3>
-      <p class="score score-locked">██ / 100</p>
-      <p>Verdict, flags, narrative, and ${data.lockedFields.length} source fields require entitlement.</p>
+    <div class="locked-grid">
+      <div class="locked-field">
+        <span class="locked-label">Risk score</span>
+        <p class="score score-locked">██ / 100</p>
+        <span class="lock-tag">PRO ONLY</span>
+      </div>
+      <div class="locked-field">
+        <span class="locked-label">Verdict</span>
+        <p class="locked-redacted">████████</p>
+        <span class="lock-tag">PRO ONLY</span>
+      </div>
+      <div class="locked-field">
+        <span class="locked-label">Flags</span>
+        <ul class="locked-list">
+          <li class="locked-redacted">████████████</li>
+          <li class="locked-redacted">████████████</li>
+          <li class="locked-redacted">████████████</li>
+        </ul>
+        <span class="lock-tag">PRO ONLY</span>
+      </div>
+      <div class="locked-field">
+        <span class="locked-label">Sources</span>
+        <p class="locked-redacted">${data.lockedFields.length} cited sources hidden</p>
+        <span class="lock-tag">PRO ONLY</span>
+      </div>
     </div>
   `;
   els.tierLabel.textContent = 'FREE / LOCKED';
@@ -96,23 +143,30 @@ function renderPro(data) {
     .join('');
 
   els.resultsBody.innerHTML = `
-    <div class="card">
-      <h3>${data.addressType} · Pro unlock</h3>
-      <p><code>${data.address}</code></p>
-      <p class="score">${data.riskScore} / 100</p>
-      <span class="verdict ${verdictClass(data.verdict)}">${data.verdict}</span>
-      <p style="margin-top:0.75rem">${data.summary}</p>
+    <div class="tier-banner tier-banner-pro">
+      <span class="tier-banner-icon">✓</span>
+      <div>
+        <strong>PRO UNLOCKED</strong>
+        <p>Full research via RevenueCat entitlement — TEST / SANDBOX</p>
+      </div>
     </div>
-    <div class="card">
+    <div class="card card-pro">
+      <h3>${data.addressType} · Pro research</h3>
+      <p><code>${data.address}</code></p>
+      <p class="score score-pro">${data.riskScore} / 100</p>
+      <span class="verdict ${verdictClass(data.verdict)}">${data.verdict}</span>
+      <p class="pro-summary">${data.summary}</p>
+    </div>
+    <div class="card card-pro">
       <h3>Research detail</h3>
       <p>${data.detail.narrative}</p>
       <ul>${data.detail.checklist.map((c) => `<li>${c}</li>`).join('')}</ul>
     </div>
-    <div class="card">
-      <h3>Flags</h3>
-      <ul>${flags}</ul>
+    <div class="card card-pro">
+      <h3>Flags (${data.flags.length})</h3>
+      <ul class="pro-flags">${flags}</ul>
     </div>
-    <div class="card">
+    <div class="card card-pro">
       <h3>Sources (${data.dataSource})</h3>
       <ul class="sources">${sources}</ul>
     </div>
@@ -163,19 +217,18 @@ function updateEntitlementBadge() {
 }
 
 function entitlementActive(customerInfo, entitlementId) {
-  return Boolean(customerInfo?.entitlements?.active?.[entitlementId]);
+  if (!customerInfo?.entitlements?.active) return false;
+  const active = customerInfo.entitlements.active;
+  if (active[entitlementId]) return true;
+  // Accept common aliases documented in README (pay-35 Pro, pay-35-pro, etc.)
+  const aliases = ['pro', 'pay-35-pro', 'pay35_pro', 'morning_light_pro'];
+  return aliases.some((id) => id !== entitlementId && active[id]);
 }
 
 async function syncEntitlementFromSdk() {
   if (!state.purchases || !state.config) return;
 
-  if (state.demoOverride === 'expired') {
-    state.hasPro = false;
-    updateEntitlementBadge();
-    return;
-  }
-
-  if (state.demoOverride === 'fail') {
+  if (state.demoOverride === 'expired' || state.demoOverride === 'fail') {
     state.hasPro = false;
     updateEntitlementBadge();
     return;
@@ -190,6 +243,7 @@ async function loadOfferingMeta() {
   if (!state.purchases) {
     els.offeringPrice.textContent = 'Add REVENUECAT_API_KEY to enable Test Store checkout.';
     els.unlockBtn.disabled = true;
+    els.stepUnlockBtn.disabled = true;
     return;
   }
 
@@ -207,9 +261,11 @@ async function loadOfferingMeta() {
         'No offering packages found. Attach a Test Store product to your current offering in RevenueCat.';
     }
     els.unlockBtn.disabled = !pkg;
+    els.stepUnlockBtn.disabled = !pkg;
   } catch (err) {
     els.offeringPrice.textContent = `Offerings error: ${err.message}`;
     els.unlockBtn.disabled = true;
+    els.stepUnlockBtn.disabled = true;
   }
 }
 
@@ -231,6 +287,8 @@ async function purchasePro() {
 
   state.demoOverride = null;
   openPaywallModal();
+  highlightJudgeStep(2);
+  setJudgeStepStatus('Step <strong>2 Unlock Pro</strong> — choose <strong>Success</strong>, <strong>Fail</strong>, or <strong>Cancel</strong> in the TEST / SANDBOX modal.');
   showMessage('TEST / SANDBOX checkout opened — choose Success, Fail, or Cancel in the RevenueCat modal.', 'info');
 
   try {
@@ -252,6 +310,8 @@ async function purchasePro() {
     updateEntitlementBadge();
 
     if (state.hasPro) {
+      highlightJudgeStep(3);
+      setJudgeStepStatus('Step <strong>3 After</strong> — Pro entitlement active. Full score, verdict, flags &amp; sources unlocked.');
       showMessage('TEST purchase succeeded — Pro entitlement active.', 'success');
       await refreshResults();
     } else {
@@ -267,7 +327,9 @@ async function purchasePro() {
     state.demoOverride = 'fail';
     state.hasPro = false;
     updateEntitlementBadge();
-    showMessage(`TEST purchase failed: ${err.message || 'Unknown error'}`, 'error');
+    highlightJudgeStep(4);
+    setJudgeStepStatus('Step <strong>4 Fail</strong> — TEST / SANDBOX purchase failed. Free tier locked content restored.');
+    showMessage(`TEST / SANDBOX purchase failed: ${err.message || 'Unknown error'}`, 'error');
     if (state.lastAddress) await refreshResults();
   }
 }
@@ -281,10 +343,75 @@ async function restorePurchases() {
   if (state.lastAddress) await refreshResults();
 }
 
+async function runBeforeStep() {
+  hideMessage();
+  state.demoOverride = null;
+  state.hasPro = false;
+  updateEntitlementBadge();
+
+  els.address.value = DEMO_ADDRESS;
+  state.lastAddress = DEMO_ADDRESS;
+  localStorage.setItem(STORAGE_LAST_ADDRESS, DEMO_ADDRESS);
+
+  await refreshResults(DEMO_ADDRESS);
+  highlightJudgeStep(1);
+  setJudgeStepStatus('Step <strong>1 Before</strong> — free tier teaser loaded. Score, verdict, flags &amp; sources are locked.');
+  showMessage('Free teaser loaded — locked fields visible. Tap step 2 to unlock Pro via TEST checkout.', 'info');
+}
+
+async function runAfterStep() {
+  if (!state.lastAddress) {
+    await runBeforeStep();
+  }
+
+  if (!state.hasPro) {
+    showMessage('Complete step 2 (Unlock Pro) with a successful TEST purchase first, or use Restore if you already purchased.', 'error');
+    return;
+  }
+
+  state.demoOverride = null;
+  await syncEntitlementFromSdk();
+  await refreshResults();
+  highlightJudgeStep(3);
+  setJudgeStepStatus('Step <strong>3 After</strong> — Pro research with full score, verdict, flags &amp; sources.');
+  showMessage('Pro research loaded — all fields unlocked.', 'success');
+}
+
+async function runFailStep() {
+  if (!state.lastAddress) {
+    await runBeforeStep();
+  }
+
+  state.demoOverride = 'fail';
+  state.hasPro = false;
+  els.lastPurchase.textContent = `TEST / SANDBOX fail @ ${new Date().toLocaleTimeString()}`;
+  updateEntitlementBadge();
+  await refreshResults();
+  highlightJudgeStep(4);
+  setJudgeStepStatus('Step <strong>4 Fail</strong> — TEST / SANDBOX failed purchase. Still on free tier with locked content.');
+  showMessage('TEST / SANDBOX: simulated failed purchase — free tier restored.', 'error');
+}
+
+async function runExpireStep() {
+  if (!state.lastAddress) {
+    await runBeforeStep();
+  }
+
+  state.demoOverride = 'expired';
+  state.hasPro = false;
+  els.lastPurchase.textContent = `TEST / SANDBOX expire @ ${new Date().toLocaleTimeString()}`;
+  updateEntitlementBadge();
+  await refreshResults();
+  highlightJudgeStep(5);
+  setJudgeStepStatus('Step <strong>5 Expire</strong> — TEST / SANDBOX expired entitlement. Pro content locked again.');
+  showMessage('TEST / SANDBOX: simulated expired entitlement — Pro content locked.', 'error');
+}
+
 async function initRevenueCat(config) {
   state.config = config;
   const entitlementId = config.entitlementId || 'pro';
   els.entitlementLabel.textContent = entitlementId;
+  els.entitlementLabelInline.textContent = entitlementId;
   els.paywallEntitlement.textContent = entitlementId;
 
   const appUserId = getOrCreateAppUserId();
@@ -293,6 +420,7 @@ async function initRevenueCat(config) {
   if (!config.hasRevenueCatKey) {
     els.rcStatus.textContent = 'Missing API key (UI demo only)';
     els.unlockBtn.disabled = true;
+    els.stepUnlockBtn.disabled = true;
     updateEntitlementBadge();
     return;
   }
@@ -330,23 +458,11 @@ els.unlockBtn.addEventListener('click', () => purchasePro());
 els.restoreBtn.addEventListener('click', () => restorePurchases());
 els.closePaywallBtn.addEventListener('click', () => closePaywallModal());
 
-els.simulateFailBtn.addEventListener('click', async () => {
-  state.demoOverride = 'fail';
-  state.hasPro = false;
-  els.lastPurchase.textContent = `Simulated fail @ ${new Date().toLocaleTimeString()}`;
-  updateEntitlementBadge();
-  showMessage('Simulated failed purchase — still on free tier. Run a real Test Store fail from checkout too.', 'error');
-  if (state.lastAddress) await refreshResults();
-});
-
-els.simulateExpireBtn.addEventListener('click', async () => {
-  state.demoOverride = 'expired';
-  state.hasPro = false;
-  els.lastPurchase.textContent = `Simulated expire @ ${new Date().toLocaleTimeString()}`;
-  updateEntitlementBadge();
-  showMessage('Simulated expired / revoked entitlement — Pro content locked again.', 'error');
-  if (state.lastAddress) await refreshResults();
-});
+els.stepBeforeBtn.addEventListener('click', () => runBeforeStep());
+els.stepUnlockBtn.addEventListener('click', () => purchasePro());
+els.stepAfterBtn.addEventListener('click', () => runAfterStep());
+els.stepFailBtn.addEventListener('click', () => runFailStep());
+els.stepExpireBtn.addEventListener('click', () => runExpireStep());
 
 els.refreshEntitlementBtn.addEventListener('click', async () => {
   state.demoOverride = null;

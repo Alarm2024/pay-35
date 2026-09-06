@@ -434,6 +434,227 @@ input[type="text"]:focus {
   padding: 1rem;
 }
 
+.judge-demo-header h2 {
+  margin: 0 0 0.35rem;
+}
+
+.judge-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.65rem;
+  list-style: none;
+  margin: 1rem 0 0.75rem;
+  padding: 0;
+}
+
+.judge-step-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.75rem 0.65rem;
+  border: 2px solid #fff;
+  box-shadow: 4px 4px 0 #000;
+  background: #2a2033;
+  color: var(--ink);
+  font-family: var(--font);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.judge-step-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #000;
+}
+
+.judge-step-btn.is-active {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.judge-step-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.step-num {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #fff;
+  background: var(--yellow);
+  color: #111;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.step-label {
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.step-hint {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.judge-step-accent {
+  background: rgba(255, 79, 216, 0.2);
+  border-color: var(--pink);
+}
+
+.judge-step-pro {
+  background: rgba(87, 242, 135, 0.15);
+  border-color: var(--green);
+}
+
+.judge-step-fail {
+  background: rgba(255, 92, 92, 0.15);
+  border-color: var(--red);
+}
+
+.judge-step-expire {
+  background: rgba(255, 179, 71, 0.15);
+  border-color: var(--orange);
+}
+
+.judge-step-status {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.tier-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid #fff;
+}
+
+.tier-banner-free {
+  background: rgba(255, 92, 92, 0.12);
+  border-color: var(--red);
+}
+
+.tier-banner-pro {
+  background: rgba(87, 242, 135, 0.12);
+  border-color: var(--green);
+}
+
+.tier-banner-icon {
+  font-size: 1.5rem;
+}
+
+.tier-banner strong {
+  display: block;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.tier-banner p {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.card-free {
+  border-color: rgba(255, 92, 92, 0.35);
+}
+
+.card-pro {
+  border-color: rgba(87, 242, 135, 0.45);
+}
+
+.free-hint {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.locked-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.locked-field {
+  position: relative;
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  padding: 0.85rem;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.locked-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pink);
+  margin-bottom: 0.35rem;
+}
+
+.locked-redacted {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--muted);
+  filter: blur(4px);
+  user-select: none;
+}
+
+.locked-list {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.lock-tag {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--red);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--red);
+}
+
+.score-pro {
+  font-size: 2.5rem;
+  color: var(--green);
+}
+
+.pro-summary {
+  margin-top: 0.75rem;
+  line-height: 1.55;
+}
+
+.pro-flags li {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .judge-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 720px) {
   .input-row {
     grid-template-columns: 1fr;
@@ -441,5 +662,9 @@ input[type="text"]:focus {
 
   .topbar {
     flex-direction: column;
+  }
+
+  .judge-steps {
+    grid-template-columns: 1fr;
   }
 }

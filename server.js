@@ -13,6 +13,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const REVENUECAT_API_KEY = process.env.REVENUECAT_API_KEY || '';
+// Default entitlement id is `pro`. Common aliases in RevenueCat dashboards for pay-35:
+//   pro · pay-35-pro · pay35_pro · morning_light_pro · "Morning Light Pro" (display name)
+// Set REVENUECAT_ENTITLEMENT_ID to whichever identifier you attached products to.
 const REVENUECAT_ENTITLEMENT_ID = process.env.REVENUECAT_ENTITLEMENT_ID || 'pro';
 const LINKUP_API_KEY = process.env.LINKUP_API_KEY || '';
 
