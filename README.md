@@ -68,11 +68,30 @@ Configure a paywall template in RevenueCat if you want `presentPaywall()` stylin
 ### 5. Env var
 
 ```bash
-REVENUECAT_API_KEY=rcb_test_store_public_key_here
+# Test Store (recommended for hackathon / judge demo) — key starts with test_
+REVENUECAT_API_KEY=test_your_test_store_public_key
+
+# Web Billing + Stripe (production-style web checkout) — key starts with rcb_
+# REVENUECAT_API_KEY=rcb_your_web_billing_public_key
+
 REVENUECAT_ENTITLEMENT_ID=pro
 ```
 
 > **Never ship production with a Test Store key.** Use platform-specific keys for real stores.
+
+### Test Store vs Web Billing checkout UI
+
+| API key prefix | Checkout behavior in this app |
+|----------------|------------------------------|
+| `test_*` | RevenueCat mounts its **Test Store modal on the page** (Success / Fail / Cancel). The app **does not** open an empty white overlay — that hid the SDK modal (the live bug). |
+| `rcb_*` | Web Billing checkout renders **inside** the in-app “TEST / SANDBOX CHECKOUT” card via `purchase({ htmlTarget })`. Requires Stripe connected under **Apps & providers → Web → RevenueCat Billing**. |
+| Missing / wrong | Modal shows **package list fallback** (when offerings exist) or **setup steps** with on-page error text — no blank white body. |
+
+Judges can always use homepage steps **④ Fail** and **⑤ Expire** to simulate failed/expired entitlement without a live purchase.
+
+### Wait overlay safety (`#pay-ready`)
+
+On boot and checkout start, a **Please wait…** overlay (`#pay-ready`) may appear while RevenueCat initializes. It is **always dismissed within 3 seconds** — even if `getOfferings()` or SDK preload hangs — so the app never stays blocked. Steps **4 Fail** / **5 Expire** force-dismiss any stuck overlay and RevenueCat SDK roots.
 
 ---
 
