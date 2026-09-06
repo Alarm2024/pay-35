@@ -1,0 +1,25 @@
+{
+  "name": "pay-35",
+  "version": "1.0.0",
+  "description": "Morning Light Pay — Solana mint/pool research with RevenueCat Pro unlock",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "revenuecat",
+    "solana",
+    "burning-token",
+    "hackathon"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "linkup-sdk": "^3.6.0"
+  }
+}
