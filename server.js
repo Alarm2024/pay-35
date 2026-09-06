@@ -8,12 +8,13 @@ const {
   proPayload,
   isValidSolanaAddress,
 } = require('./lib/research');
+const { resolveEntitlementIds } = require('./lib/entitlements');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const REVENUECAT_API_KEY = process.env.REVENUECAT_API_KEY || '';
-const REVENUECAT_ENTITLEMENT_ID = process.env.REVENUECAT_ENTITLEMENT_ID || 'pro';
+const ENTITLEMENT_IDS = resolveEntitlementIds(process.env.REVENUECAT_ENTITLEMENT_ID);
 const LINKUP_API_KEY = process.env.LINKUP_API_KEY || '';
 
 app.use(express.json());
@@ -25,7 +26,8 @@ app.get('/health', (_req, res) => {
     service: 'pay-35',
     revenueCatKeyConfigured: Boolean(REVENUECAT_API_KEY),
     linkupKeyConfigured: Boolean(LINKUP_API_KEY),
-    entitlementId: REVENUECAT_ENTITLEMENT_ID,
+    entitlementIds: ENTITLEMENT_IDS,
+    entitlementId: ENTITLEMENT_IDS[0],
     sandboxMode: true,
   });
 });
@@ -33,7 +35,8 @@ app.get('/health', (_req, res) => {
 app.get('/api/config', (_req, res) => {
   res.json({
     revenueCatApiKey: REVENUECAT_API_KEY || null,
-    entitlementId: REVENUECAT_ENTITLEMENT_ID,
+    entitlementIds: ENTITLEMENT_IDS,
+    entitlementId: ENTITLEMENT_IDS[0],
     sandboxMode: true,
     hasRevenueCatKey: Boolean(REVENUECAT_API_KEY),
     hasLinkupKey: Boolean(LINKUP_API_KEY),
@@ -68,4 +71,5 @@ app.get('*', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`Morning Light Pay listening on http://localhost:${PORT}`);
   console.log(`RevenueCat key: ${REVENUECAT_API_KEY ? 'configured' : 'missing (demo UI only)'}`);
+  console.log(`Entitlement IDs: ${ENTITLEMENT_IDS.join(', ')}`);
 });
