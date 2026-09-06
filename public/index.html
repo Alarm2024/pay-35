@@ -23,17 +23,108 @@
         </div>
       </div>
       <div class="status-stack">
-        <span id="sandbox-badge" class="badge badge-sandbox">TEST / SANDBOX</span>
+        <span class="badge badge-sandbox">TEST / SANDBOX</span>
         <span id="entitlement-badge" class="badge badge-locked">FREE TIER</span>
       </div>
     </header>
 
     <main class="layout">
+      <section class="panel judge-script" id="judge-script">
+        <div class="judge-script-head">
+          <h2>Judge demo script</h2>
+          <span class="badge badge-sandbox">~60 sec · TEST / SANDBOX</span>
+        </div>
+        <p class="muted judge-intro">
+          Tap each numbered step in order. Every button runs a real app path — no hidden modes.
+        </p>
+        <ol class="demo-steps">
+          <li class="demo-step" data-step="1">
+            <div class="step-copy">
+              <span class="step-num">1</span>
+              <div>
+                <strong>BEFORE</strong> — Free locked glance (teaser only)
+              </div>
+            </div>
+            <button id="demo-step-1" class="btn btn-primary btn-step" type="button">
+              Step 1 · Scan Free
+            </button>
+          </li>
+          <li class="demo-step" data-step="2">
+            <div class="step-copy">
+              <span class="step-num">2</span>
+              <div>
+                <strong>UNLOCK PRO</strong> — RevenueCat Test Store purchase
+              </div>
+            </div>
+            <button id="demo-step-2" class="btn btn-accent btn-step" type="button">
+              Step 2 · Unlock Pro (TEST / SANDBOX)
+            </button>
+          </li>
+          <li class="demo-step" data-step="3">
+            <div class="step-copy">
+              <span class="step-num">3</span>
+              <div>
+                <strong>AFTER</strong> — Full Pro research unlocked
+              </div>
+            </div>
+            <button id="demo-step-3" class="btn btn-pro btn-step" type="button">
+              Step 3 · Show Pro Results
+            </button>
+          </li>
+          <li class="demo-step" data-step="4">
+            <div class="step-copy">
+              <span class="step-num">4</span>
+              <div>
+                <strong>FAIL</strong> — Purchase denied (one tap)
+              </div>
+            </div>
+            <button id="demo-step-4" class="btn btn-danger btn-step" type="button">
+              Step 4 · Simulate Fail (TEST / SANDBOX)
+            </button>
+          </li>
+          <li class="demo-step" data-step="5">
+            <div class="step-copy">
+              <span class="step-num">5</span>
+              <div>
+                <strong>EXPIRE</strong> — Entitlement revoked (one tap)
+              </div>
+            </div>
+            <button id="demo-step-5" class="btn btn-warning btn-step" type="button">
+              Step 5 · Simulate Expire (TEST / SANDBOX)
+            </button>
+          </li>
+        </ol>
+        <div class="judge-meta">
+          <button id="refresh-entitlement-btn" class="btn btn-ghost btn-small" type="button">
+            Refresh entitlement from RevenueCat
+          </button>
+          <button id="restore-btn" class="btn btn-ghost btn-small" type="button">Restore purchases</button>
+        </div>
+        <dl class="meta-grid">
+          <div>
+            <dt>Entitlement IDs tried</dt>
+            <dd id="entitlement-ids">—</dd>
+          </div>
+          <div>
+            <dt>Active entitlement</dt>
+            <dd id="active-entitlement">—</dd>
+          </div>
+          <div>
+            <dt>App User ID</dt>
+            <dd id="app-user-id">—</dd>
+          </div>
+          <div>
+            <dt>Last event</dt>
+            <dd id="last-purchase">—</dd>
+          </div>
+        </dl>
+      </section>
+
       <section class="panel hero">
         <p class="lede">
           Solana traders get a <strong>free mint/pool glance</strong>, then unlock
-          <strong>Pro research</strong> via RevenueCat Test Store — full verdict, risk score, and
-          sources-style detail behind entitlement <code id="entitlement-label">pro</code>.
+          <strong>Pro research</strong> via RevenueCat Test Store — full verdict, risk score, flags, and
+          sources behind entitlement <code id="entitlement-label">pro</code>.
         </p>
 
         <form id="lookup-form" class="lookup-form">
@@ -58,7 +149,7 @@
       <section class="panel results" id="results-panel" hidden>
         <div class="results-header">
           <h2>Research</h2>
-          <span id="tier-label" class="badge badge-locked">LOCKED</span>
+          <span id="tier-label" class="badge badge-locked">FREE · LOCKED</span>
         </div>
         <div id="results-body" class="results-body"></div>
 
@@ -69,39 +160,12 @@
             <strong id="paywall-entitlement">pro</strong>.
           </p>
           <div class="cta-row">
-            <button id="unlock-btn" class="btn btn-accent" type="button">Unlock Pro (Test Store)</button>
-            <button id="restore-btn" class="btn btn-ghost" type="button">Restore purchases</button>
+            <button id="unlock-btn" class="btn btn-accent" type="button">
+              Unlock Pro (TEST / SANDBOX)
+            </button>
           </div>
           <p id="offering-price" class="offering-meta"></p>
         </div>
-      </section>
-
-      <section class="panel judge-tools">
-        <h2>Judge demo controls</h2>
-        <p class="muted">
-          RevenueCat Test Store shows success / fail / cancel in its purchase modal. Use the buttons
-          below to rehearse failed purchase and expired entitlement UI paths without waiting for
-          subscription expiry.
-        </p>
-        <div class="cta-row">
-          <button id="simulate-fail-btn" class="btn btn-danger" type="button">Simulate failed purchase</button>
-          <button id="simulate-expire-btn" class="btn btn-warning" type="button">Simulate expired entitlement</button>
-          <button id="refresh-entitlement-btn" class="btn btn-ghost" type="button">Refresh entitlement</button>
-        </div>
-        <dl class="meta-grid">
-          <div>
-            <dt>App User ID</dt>
-            <dd id="app-user-id">—</dd>
-          </div>
-          <div>
-            <dt>RevenueCat</dt>
-            <dd id="rc-status">Initializing…</dd>
-          </div>
-          <div>
-            <dt>Last purchase</dt>
-            <dd id="last-purchase">—</dd>
-          </div>
-        </dl>
       </section>
     </main>
 
@@ -118,7 +182,9 @@
     <footer class="footer">
       <a href="/health" target="_blank" rel="noreferrer">/health</a>
       <span>·</span>
-      <span>pay-35 · Morning Light Pay · RevenueCat Subscriptions track</span>
+      <span id="rc-status">RevenueCat initializing…</span>
+      <span>·</span>
+      <span>pay-35 · Morning Light Pay</span>
     </footer>
 
     <script type="module" src="/app.js"></script>

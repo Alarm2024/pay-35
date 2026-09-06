@@ -2,180 +2,80 @@
 
 **Burning Token · Subscriptions · RevenueCat track**
 
-Solana traders get a **free limited mint/pool glance**, then unlock **Pro research** (full verdict, risk score, flags, sources-style detail) via RevenueCat Test Store / Web Billing. Entitlement **`pro`** gates the paid tier.
-
-Public demo UI labels all purchases **TEST / SANDBOX**.
+Free Solana mint/pool glance → **Pro research** unlock via RevenueCat **Test Store** (entitlement `pro` or slug variants). All purchases labeled **TEST / SANDBOX**.
 
 ---
 
-## Features
+## 60-second judge demo
 
-| Tier | What you get |
-|------|----------------|
-| **Free** | Address type, risk band hint, teaser copy |
-| **Pro** (`pro` entitlement) | Full risk score, verdict, flags, narrative, cited sources |
+Open the app. The **Judge demo script** panel is at the top — tap each step in order:
 
-- RevenueCat Web SDK (`@revenuecat/purchases-js`) with **Test Store** checkout modal (success / fail / cancel)
-- Judge controls: simulate failed purchase, simulate expired entitlement, restore + refresh
-- Optional Linkup `/search` (fast) when `LINKUP_API_KEY` is set; otherwise deterministic mock research
-- `/health` JSON (never exposes secrets)
-- Render-ready: `npm start`
+| Step | Button | What judges see |
+|------|--------|-----------------|
+| **1 · BEFORE** | Step 1 · Scan Free | FREE tier: type + hint only; score/verdict/sources **locked** |
+| **2 · UNLOCK** | Step 2 · Unlock Pro (TEST / SANDBOX) | RevenueCat modal → pick **Success** |
+| **3 · AFTER** | Step 3 · Show Pro Results | **PAID · PRO UNLOCKED** banner, full score, flags, sources |
+| **4 · FAIL** | Step 4 · Simulate Fail (TEST / SANDBOX) | One tap → purchase failed, back to locked free |
+| **5 · EXPIRE** | Step 5 · Simulate Expire (TEST / SANDBOX) | One tap → entitlement revoked, Pro locked again |
 
----
+Demo address pre-filled: `So11111111111111111111111111111111111111112`
 
-## RevenueCat setup (Test Store)
-
-Do this once in [RevenueCat Dashboard](https://app.revenuecat.com):
-
-### 1. Create / open project
-
-Create a project (or use an existing one). A **Test Store** is often auto-created for new projects.
-
-### 2. Test Store + Web Billing
-
-1. **Apps & providers → Test Store** — create if missing. Copy the **Test Store public API key** (used as `REVENUECAT_API_KEY`).
-2. **Apps & providers → Web → RevenueCat Billing** — connect Stripe (required for Web Billing gateway), create a web config.
-
-### 3. Product catalog
-
-1. **Product catalog → Products** — create a **Test Store** subscription product (e.g. `mlpay_pro_monthly`, 1 month).
-2. **Product catalog → Entitlements** — create entitlement identifier **`pro`** and attach the Test Store product.
-3. **Product catalog → Offerings** — edit **Current** offering (or create one), add a package pointing at your Test Store product.
-
-### 4. Paywall (optional)
-
-Configure a paywall template in RevenueCat if you want `presentPaywall()` styling; package purchase also works without it.
-
-### 5. Env var
-
-```bash
-REVENUECAT_API_KEY=rcb_test_store_public_key_here
-REVENUECAT_ENTITLEMENT_ID=pro
-```
-
-> **Never ship production with a Test Store key.** Use platform-specific keys for real stores.
+`/health` → confirms keys configured (no secrets echoed).
 
 ---
 
-## Environment variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `REVENUECAT_API_KEY` | Yes (for live Test Store demo) | Public Web / Test Store SDK key |
-| `REVENUECAT_ENTITLEMENT_ID` | No (default `pro`) | Entitlement that unlocks full research |
-| `LINKUP_API_KEY` | No | Linkup `/search` for live web sources |
-| `PORT` | No (default `3000`) | HTTP port (`Render` sets this) |
-
-Copy the example file:
-
-```bash
-cp .env.example .env
-# edit .env with your keys
-```
-
-**No secrets belong in git.** `.env` is gitignored.
-
----
-
-## Local run
+## Quick start
 
 ```bash
 npm install
-cp .env.example .env
-# add REVENUECAT_API_KEY (and optional LINKUP_API_KEY)
-npm start
+cp .env.example .env   # add REVENUECAT_API_KEY
+npm start              # http://localhost:3000
 ```
 
-Open http://localhost:3000
+---
 
-Health check: http://localhost:3000/health
+## Env vars
 
-Without `REVENUECAT_API_KEY`, the UI and mock research still run; purchase buttons stay disabled.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `REVENUECAT_API_KEY` | Yes (live purchases) | Test Store **public** SDK key |
+| `REVENUECAT_ENTITLEMENT_ID` | No | Comma-separated IDs; default tries `pro`, `pay-35 Pro`, `pay-35-pro`, `pay_35_pro` |
+| `LINKUP_API_KEY` | No | Linkup `/search` for live sources |
+| `PORT` | No | Render sets automatically |
+
+No secrets in repo. `.env` is gitignored.
+
+---
+
+## RevenueCat setup
+
+1. [Dashboard](https://app.revenuecat.com) → **Test Store** → copy public API key
+2. **Web Billing** config (Stripe gateway)
+3. **Product** (Test Store subscription) → **Entitlement** (`pro`) → **Offering** (current)
+4. Set `REVENUECAT_API_KEY` on Render / locally
 
 ---
 
 ## Deploy on Render
 
-1. New **Web Service** → connect this repo
-2. **Build command:** `npm install`
-3. **Start command:** `npm start`
-4. Add env vars in Render dashboard:
-   - `REVENUECAT_API_KEY`
-   - `REVENUECAT_ENTITLEMENT_ID=pro`
-   - `LINKUP_API_KEY` (optional)
-
-Render sets `PORT` automatically.
-
----
-
-## Judge demo script
-
-Use a known Solana address (mint or pool), e.g. wrapped SOL:
-
-`So11111111111111111111111111111111111111112`
-
-### 1. BEFORE purchase (free / locked)
-
-1. Open the app — confirm **TEST / SANDBOX** badge and **FREE TIER**.
-2. Paste address → **Scan (Free)**.
-3. See teaser only: type, hint, blurred score area, paywall CTA.
-
-### 2. AFTER successful test purchase
-
-1. Click **Unlock Pro (Test Store)**.
-2. In the RevenueCat modal, choose **Success** (sandbox).
-3. Badge → **PRO ACTIVE**; full score, verdict, flags, sources render.
-4. Footer still shows sandbox labeling.
-
-### 3. FAILED purchase path
-
-**Option A (real Test Store):** Start checkout → choose **Fail** in the modal.
-
-**Option B (UI rehearsal):** Click **Simulate failed purchase** — returns to locked free view.
-
-### 4. EXPIRED / revoked entitlement
-
-**Option A (real):** Wait for Test Store subscription to expire (accelerated renewals; see [RevenueCat Test Store docs](https://www.revenuecat.com/docs/test-and-launch/sandbox/test-store)).
-
-**Option B (UI rehearsal):** Click **Simulate expired entitlement** — Pro content locks again.
-
-Use **Refresh entitlement** or **Restore purchases** to sync real RevenueCat state after a live test purchase.
+| Setting | Value |
+|---------|-------|
+| Build | `npm install` |
+| Start | `npm start` |
+| Env | `REVENUECAT_API_KEY`, optional `REVENUECAT_ENTITLEMENT_ID`, `LINKUP_API_KEY` |
 
 ---
 
 ## API
 
-### `GET /health`
+**`GET /health`** — `{ ok, revenueCatKeyConfigured, entitlementIds, sandboxMode }`
 
-```json
-{
-  "ok": true,
-  "service": "pay-35",
-  "revenueCatKeyConfigured": true,
-  "linkupKeyConfigured": false,
-  "entitlementId": "pro",
-  "sandboxMode": true
-}
-```
-
-### `POST /api/research`
-
-```json
-{ "address": "<solana-address>", "tier": "free" }
-```
-
-`tier`: `"free"` (teaser) or `"pro"` (full payload). The browser only requests `"pro"` when RevenueCat reports active entitlement client-side.
+**`POST /api/research`** — `{ address, tier: "free"|"pro" }`
 
 ---
 
 ## Stack
 
-- **Node 18+ / Express** — static UI + research API
-- **RevenueCat Web SDK** — Test Store purchases & entitlement checks
-- **Linkup SDK** (optional) — `/search` only, not paid Research
-
----
-
-## License
+Node/Express · RevenueCat Web SDK · optional Linkup search · Render-ready (`npm start`, `PORT`)
 
 MIT
