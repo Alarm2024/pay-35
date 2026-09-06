@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Morning Light Pay · pay-35</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="grain"></div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">☀</span>
+        <div>
+          <p class="eyebrow">Burning Token · RevenueCat</p>
+          <h1>Morning Light Pay</h1>
+        </div>
+      </div>
+      <div class="status-stack">
+        <span id="sandbox-badge" class="badge badge-sandbox">TEST / SANDBOX</span>
+        <span id="entitlement-badge" class="badge badge-locked">FREE TIER</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel hero">
+        <p class="lede">
+          Solana traders get a <strong>free mint/pool glance</strong>, then unlock
+          <strong>Pro research</strong> via RevenueCat Test Store — full verdict, risk score, and
+          sources-style detail behind entitlement <code id="entitlement-label">pro</code>.
+        </p>
+
+        <form id="lookup-form" class="lookup-form">
+          <label for="address">Solana mint or pool address</label>
+          <div class="input-row">
+            <input
+              id="address"
+              name="address"
+              type="text"
+              placeholder="e.g. So11111111111111111111111111111111111111112"
+              autocomplete="off"
+              spellcheck="false"
+              required
+            />
+            <button type="submit" class="btn btn-primary">Scan (Free)</button>
+          </div>
+        </form>
+
+        <div id="message" class="message" hidden></div>
+      </section>
+
+      <section class="panel results" id="results-panel" hidden>
+        <div class="results-header">
+          <h2>Research</h2>
+          <span id="tier-label" class="badge badge-locked">LOCKED</span>
+        </div>
+        <div id="results-body" class="results-body"></div>
+
+        <div id="paywall" class="paywall" hidden>
+          <h3>Unlock Pro Research</h3>
+          <p>
+            Full risk score, verdict, flags, and cited sources are behind RevenueCat entitlement
+            <strong id="paywall-entitlement">pro</strong>.
+          </p>
+          <div class="cta-row">
+            <button id="unlock-btn" class="btn btn-accent" type="button">Unlock Pro (Test Store)</button>
+            <button id="restore-btn" class="btn btn-ghost" type="button">Restore purchases</button>
+          </div>
+          <p id="offering-price" class="offering-meta"></p>
+        </div>
+      </section>
+
+      <section class="panel judge-tools">
+        <h2>Judge demo controls</h2>
+        <p class="muted">
+          RevenueCat Test Store shows success / fail / cancel in its purchase modal. Use the buttons
+          below to rehearse failed purchase and expired entitlement UI paths without waiting for
+          subscription expiry.
+        </p>
+        <div class="cta-row">
+          <button id="simulate-fail-btn" class="btn btn-danger" type="button">Simulate failed purchase</button>
+          <button id="simulate-expire-btn" class="btn btn-warning" type="button">Simulate expired entitlement</button>
+          <button id="refresh-entitlement-btn" class="btn btn-ghost" type="button">Refresh entitlement</button>
+        </div>
+        <dl class="meta-grid">
+          <div>
+            <dt>App User ID</dt>
+            <dd id="app-user-id">—</dd>
+          </div>
+          <div>
+            <dt>RevenueCat</dt>
+            <dd id="rc-status">Initializing…</dd>
+          </div>
+          <div>
+            <dt>Last purchase</dt>
+            <dd id="last-purchase">—</dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <div id="paywall-modal" class="modal" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <span class="badge badge-sandbox">TEST / SANDBOX CHECKOUT</span>
+          <button id="close-paywall-btn" class="icon-btn" type="button" aria-label="Close">×</button>
+        </div>
+        <div id="paywall-container" class="paywall-container"></div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <a href="/health" target="_blank" rel="noreferrer">/health</a>
+      <span>·</span>
+      <span>pay-35 · Morning Light Pay · RevenueCat Subscriptions track</span>
+    </footer>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
